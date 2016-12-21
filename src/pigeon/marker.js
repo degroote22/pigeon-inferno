@@ -11,6 +11,8 @@ const imageOffset = {
   top: 31
 }
 
+const NOOP = () => {}
+
 export default class Marker extends Component {
 //   static propTypes = {
 //     // input, passed to events
@@ -91,12 +93,12 @@ export default class Marker extends Component {
 
   handleMouseOver = (event) => {
     this.props.onMouseOver && this.props.onMouseOver(this.eventParameters())
-    this.setState({ hover: true })
+    this.setState({ hover: true }, NOOP)
   }
 
   handleMouseOut = (event) => {
     this.props.onMouseOut && this.props.onMouseOut(this.eventParameters())
-    this.setState({ hover: false })
+    this.setState({ hover: false }, NOOP)
   }
 
   // render

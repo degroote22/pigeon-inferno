@@ -4,6 +4,8 @@ import Component from 'inferno-component';
 import parentPosition from './utils/parent-position'
 import parentHasClass from './utils/parent-has-class'
 
+const NOOP = () => {}
+
 const ANIMATION_TIME = 300
 const DIAGONAL_THROW_TIME = 1500
 const SCROLL_PIXELS_FOR_ZOOM_LEVEL = 150
@@ -28,8 +30,7 @@ const InfernoChildren = {
 // http://a.tile.openstreetmap.org/${z}/${x}/${y}.png 
 
 function openStreetMap (x, y, z) {
-  const retina = typeof window !== 'undefined' && window.devicePixelRatio >= 2
-  return `https://a.tile.openstreetmap.org/${z}/${x}/${y}${retina ? '@2x' : ''}.png`
+  return `https://a.tile.openstreetmap.org/${z}/${x}/${y}.png`
 }
 
 // https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames
@@ -236,7 +237,7 @@ export default class Map extends Component {
 
       this.setState({
         oldTiles: oldTiles.filter(o => o.roundedZoom !== tileValues.roundedZoom).concat(tileValues)
-      })
+      }, NOOP)
 
       let loadTracker = {}
 
@@ -250,7 +251,7 @@ export default class Map extends Component {
       this._loadTracker = loadTracker
     }
 
-    this.setState({ center: limitedCenter, zoom })
+    this.setState({ center: limitedCenter, zoom }, NOOP)
 
     if (Math.abs(this.props.zoom - zoom) > 0.001 ||
         Math.abs(this.props.center[0] - limitedCenter[0]) > 0.0001 ||
@@ -266,7 +267,7 @@ export default class Map extends Component {
       const unloadedCount = Object.keys(this._loadTracker).filter(k => !this._loadTracker[k]).length
 
       if (unloadedCount === 0) {
-        this.setState({ oldTiles: [] })
+        this.setState({ oldTiles: [] }, NOOP)
       }
     }
   }
@@ -323,7 +324,7 @@ export default class Map extends Component {
           touch.clientX - this._touchStartCoords[0][0],
           touch.clientY - this._touchStartCoords[0][1]
         ]
-      })
+      }, NOOP)
     } else if (event.touches.length === 2 && this._touchStartCoords) {
       const { width, height } = this.props
       const { zoom } = this.state
@@ -354,7 +355,7 @@ export default class Map extends Component {
           centerDiffDiff[0] + midPointDiff[0] * scale,
           centerDiffDiff[1] + midPointDiff[1] * scale
         ]
-      })
+      }, NOOP)
     }
   }
 
@@ -410,7 +411,7 @@ export default class Map extends Component {
           this._mousePosition[0] - this._dragStart[0],
           this._mousePosition[1] - this._dragStart[1]
         ]
-      })
+      }, NOOP)
     }
   }
 
@@ -427,7 +428,7 @@ export default class Map extends Component {
           (!pixelDelta || Math.abs(pixelDelta[0]) + Math.abs(pixelDelta[1]) <= CLICK_TOLERANCE)) {
         const latLng = this.pixelToLatLng(pixel)
         this.props.onClick({ event, latLng, pixel: pixel })
-        this.setState({ pixelDelta: null })
+        this.setState({ pixelDelta: null }, NOOP)
       } else {
         const { center, zoom } = this.sendDeltaChange()
 
@@ -502,7 +503,7 @@ export default class Map extends Component {
     this.setState({
       pixelDelta: null,
       zoomDelta: 0
-    })
+    }, NOOP)
 
     return {
       center: this.limitCenterAtZoom([lat, lng], zoom + zoomDelta),
@@ -722,6 +723,7 @@ export default class Map extends Component {
       left: 0,
       overflow: 'hidden',
       transform: `scale(${scale}, ${scale})`,
+      willChange: 'transform',
       transformOrigin: 'top left'
     }
 
@@ -732,7 +734,8 @@ export default class Map extends Component {
       position: 'absolute',
       width: (tileMaxX - tileMinX + 1) * 256,
       height: (tileMaxY - tileMinY + 1) * 256,
-      transform: `translate(${left}px, ${top}px)`
+      transform: `translate(${left}px, ${top}px)`,
+      willChange: 'transform',
     }
 
     return (
@@ -744,7 +747,15 @@ export default class Map extends Component {
                  width={tile.width}
                  height={tile.height}
                  onLoad={() => this.imageLoaded(tile.key)}
-                 style={{ position: 'absolute', left: tile.left, top: tile.top, transform: tile.transform, transformOrigin: 'top left', opacity: 1 }} />
+                 style={{
+                   position: 'absolute',
+                   left: tile.left,
+                   top: tile.top,
+                   transform: tile.transform,
+                   willChange: 'transform',
+                   transformOrigin: 'top left',
+                   opacity: 1
+                  }} />
           ))}
         </div>
       </div>
