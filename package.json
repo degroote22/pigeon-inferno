@@ -1,0 +1,18 @@
+{
+  "name": "inferno-pigeon",
+  "version": "0.1.0",
+  "private": true,
+  "devDependencies": {
+    "inferno-scripts": "0.9.0"
+  },
+  "dependencies": {
+    "inferno": "beta36",
+    "inferno-component": "beta36"
+  },
+  "scripts": {
+    "start": "inferno-scripts start",
+    "build": "inferno-scripts build",
+    "test": "inferno-scripts test --env=jsdom",
+    "eject": "inferno-scripts eject"
+  }
+}
